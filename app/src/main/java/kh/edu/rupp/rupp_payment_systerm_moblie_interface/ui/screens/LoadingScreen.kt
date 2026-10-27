@@ -456,3 +456,4 @@ fun LoadingOverlayPreview() {
         LoadingOverlay(isLoading = true, message = "Authenticating student credentials...")
     }
 }
+
