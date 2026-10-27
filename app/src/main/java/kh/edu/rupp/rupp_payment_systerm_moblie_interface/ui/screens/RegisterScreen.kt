@@ -1,5 +1,6 @@
 package kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.R
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.AcademicYearItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.FacultyItem
@@ -174,6 +176,11 @@ fun RegisterScreen(
         }, 1200)
     }
 
+    // Hardware / Gesture Back button support
+    BackHandler {
+        onNavigateToLogin()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -197,19 +204,6 @@ fun RegisterScreen(
                     .clip(CircleShape)
                     .background(EmblemGold)
             )
-
-            IconButton(
-                onClick = onNavigateToLogin,
-                modifier = Modifier
-                    .padding(top = 40.dp, start = 12.dp)
-                    .align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Back to Login",
-                    tint = Color.White
-                )
-            }
 
             Column(
                 modifier = Modifier
@@ -740,6 +734,22 @@ fun RegisterScreen(
                     fontSize = 11.sp
                 )
             }
+        }
+
+        // -——— Floating Back Navigation Button (Always on top of Column to guarantee clickability) -———
+        IconButton(
+            onClick = onNavigateToLogin,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .zIndex(50f)
+                .padding(top = 40.dp, start = 12.dp)
+                .size(48.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Back to Login",
+                tint = Color.White
+            )
         }
     }
 }

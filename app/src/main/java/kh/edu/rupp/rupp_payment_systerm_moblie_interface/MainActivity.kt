@@ -3,6 +3,7 @@ package kh.edu.rupp.rupp_payment_systerm_moblie_interface
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             RUPP_Payment_Systerm_Moblie_InterfaceTheme {
                 var currentScreen by remember { mutableStateOf("login") }
+
+                BackHandler(enabled = currentScreen != "login") {
+                    currentScreen = "login"
+                }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     when (currentScreen) {

@@ -1,5 +1,6 @@
 package kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.R
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.*
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.util.ValidationUtils
@@ -159,6 +161,16 @@ fun ForgotPasswordScreen(
         }, 1200)
     }
 
+    // Hardware / Gesture Back button support
+    BackHandler {
+        when (currentStep) {
+            ForgotPasswordStep.ENTER_EMAIL -> onNavigateBack()
+            ForgotPasswordStep.ENTER_OTP -> currentStep = ForgotPasswordStep.ENTER_EMAIL
+            ForgotPasswordStep.NEW_PASSWORD -> currentStep = ForgotPasswordStep.ENTER_OTP
+            ForgotPasswordStep.SUCCESS -> onNavigateBack()
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -182,26 +194,6 @@ fun ForgotPasswordScreen(
                     .clip(CircleShape)
                     .background(EmblemGold)
             )
-
-            IconButton(
-                onClick = {
-                    when (currentStep) {
-                        ForgotPasswordStep.ENTER_EMAIL -> onNavigateBack()
-                        ForgotPasswordStep.ENTER_OTP -> currentStep = ForgotPasswordStep.ENTER_EMAIL
-                        ForgotPasswordStep.NEW_PASSWORD -> currentStep = ForgotPasswordStep.ENTER_OTP
-                        ForgotPasswordStep.SUCCESS -> onNavigateBack()
-                    }
-                },
-                modifier = Modifier
-                    .padding(top = 40.dp, start = 12.dp)
-                    .align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
-            }
 
             Column(
                 modifier = Modifier
@@ -768,6 +760,29 @@ fun ForgotPasswordScreen(
                     fontSize = 11.sp
                 )
             }
+        }
+
+        // -——— Floating Back Navigation Button (Always on top of Column to guarantee clickability) -———
+        IconButton(
+            onClick = {
+                when (currentStep) {
+                    ForgotPasswordStep.ENTER_EMAIL -> onNavigateBack()
+                    ForgotPasswordStep.ENTER_OTP -> currentStep = ForgotPasswordStep.ENTER_EMAIL
+                    ForgotPasswordStep.NEW_PASSWORD -> currentStep = ForgotPasswordStep.ENTER_OTP
+                    ForgotPasswordStep.SUCCESS -> onNavigateBack()
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .zIndex(50f)
+                .padding(top = 40.dp, start = 12.dp)
+                .size(48.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White
+            )
         }
     }
 }
