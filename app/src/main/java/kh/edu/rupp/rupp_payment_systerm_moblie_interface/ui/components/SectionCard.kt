@@ -55,7 +55,7 @@ fun SectionCard(
     }
 }
 
-// Label on the left, value on the right; long values wrap instead of squeezing the label
+// Label on the left, value right-aligned; each gets half the row so long values wrap instead of squeezing the label
 @Composable
 fun InfoRow(
     label: String,
@@ -85,7 +85,7 @@ fun InfoRow(
             textAlign = TextAlign.End,
             overflow = TextOverflow.Ellipsis,
             maxLines = 2,
-            modifier = Modifier.weight(1f, fill = false)
+            modifier = Modifier.weight(1f)
         )
     }
 }
