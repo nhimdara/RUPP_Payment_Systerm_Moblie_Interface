@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -157,7 +158,12 @@ private fun YearSelector(
             FilterChip(
                 selected = year.id == selectedId,
                 onClick = { onYearSelected(year.id) },
-                label = { Text(year.yearLabel) }
+                label = { Text(year.yearLabel) },
+                // the theme does not set secondaryContainer, so the default selected chip was purple
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     }
