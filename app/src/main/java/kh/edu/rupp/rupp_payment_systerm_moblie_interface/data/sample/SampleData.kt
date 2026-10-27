@@ -1,10 +1,14 @@
 package kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.sample
 
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.AcademicYearResponse
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.FacultyResponse
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentDetailResponse
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentResponse
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentStatus
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.ReceiptResponse
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SemesterResponse
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.TuitionCalculationResponse
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.TuitionFeeResponse
 
 // Fake data shaped like the real API responses, for previews and UI tests
 // until the repository layer is connected.
@@ -76,5 +80,22 @@ object SampleData {
             confirmedPayment.copy(id = 5, paymentDate = "2026-10-21T08:30:00"),
             confirmedPayment
         )
+    )
+
+    val computerScience = FacultyResponse(1, "Computer Science", "Faculty of Science")
+
+    val year2025 = AcademicYearResponse(1, "2025-2026", "2025-10-01", "2026-07-31")
+    val year2026 = AcademicYearResponse(2, "2026-2027", "2026-10-01", "2027-07-31")
+
+    val tuitionFees = listOf(
+        TuitionFeeResponse(1, computerScience, year2026, 600.0, "2026-11-30"),
+        TuitionFeeResponse(2, computerScience, year2025, 550.0, "2025-11-30")
+    )
+
+    val semesters = listOf(
+        SemesterResponse(1, "Semester 1", 1, year2026, "2026-10-01", "2027-02-28", isActive = true),
+        SemesterResponse(2, "Semester 2", 2, year2026, "2027-03-15", "2027-07-31", isActive = false),
+        SemesterResponse(3, "Semester 1", 1, year2025, "2025-10-01", "2026-02-28", isActive = false),
+        SemesterResponse(4, "Semester 2", 2, year2025, "2026-03-15", "2026-07-31", isActive = false)
     )
 }
