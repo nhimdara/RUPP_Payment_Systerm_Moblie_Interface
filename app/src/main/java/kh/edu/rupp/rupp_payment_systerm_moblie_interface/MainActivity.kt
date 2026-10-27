@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.ForgotPasswordScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoginScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.RegisterScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                                     currentScreen = "register"
                                 },
                                 onForgotPasswordClick = {
-                                    Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show()
+                                    currentScreen = "forgot_password"
                                 },
                                 onBiometricClick = {
                                     Toast.makeText(this, "Biometric login triggered", Toast.LENGTH_SHORT).show()
@@ -55,6 +56,21 @@ class MainActivity : ComponentActivity() {
                                     currentScreen = "login"
                                 },
                                 onNavigateToLogin = {
+                                    currentScreen = "login"
+                                },
+                                onContactSupportClick = {
+                                    Toast.makeText(this, "Opening RUPP ICT Helpdesk", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                        "forgot_password" -> {
+                            ForgotPasswordScreen(
+                                modifier = Modifier.padding(innerPadding),
+                                onNavigateBack = {
+                                    currentScreen = "login"
+                                },
+                                onResetComplete = {
+                                    Toast.makeText(this, "Password reset successfully! Please sign in.", Toast.LENGTH_LONG).show()
                                     currentScreen = "login"
                                 },
                                 onContactSupportClick = {

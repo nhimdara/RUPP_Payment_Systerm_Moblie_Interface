@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -16,13 +17,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -49,10 +48,11 @@ import androidx.compose.ui.unit.sp
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.R
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.LoginRequest
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.*
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.util.ValidationUtils
 
 /**
  * Modern Login Screen for RUPP Payment System
- * Designed specifically with Royal University of Phnom Penh color tokens and dark/light modes.
+ * Designed with inline field validation, error messaging, and light/dark theme support.
  */
 @Composable
 fun LoginScreen(
@@ -77,16 +77,52 @@ fun LoginScreen(
     val borderColor       = if (isDark) DarkBorder else Color(0xFFE2E8F0)
     val buttonGradient    = if (isDark) CardGradientDark else CardGradientLight
 
-    // State Holders
+    // Form & Validation States
     var selectedPortal by remember { mutableIntStateOf(0) } // 0: Student, 1: Staff / Faculty
     var usernameOrEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(true) }
+
+    // Errors
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var generalError by remember { mutableStateOf<String?>(null) }
+
     var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val scrollState = rememberScrollState()
+
+    fun validateAndSubmit() {
+        focusManager.clearFocus()
+        val uResult = ValidationUtils.validateUsernameOrEmail(usernameOrEmail)
+        val pResult = ValidationUtils.validatePassword(password)
+
+        usernameError = uResult.message
+        passwordError = pResult.message
+
+        if (!uResult.isValid || !pResult.isValid) {
+            return
+        }
+
+        generalError = null
+        val request = LoginRequest(
+            usernameOrEmail = usernameOrEmail.trim(),
+            password = password
+        )
+
+        isLoading = true
+        // Simulated API authentication call (or call to your repository)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            isLoading = false
+            // Check for valid credentials
+            if (request.password == "student123" || request.password.length >= 6) {
+                onLoginSuccess(request)
+            } else {
+                generalError = "Invalid username/email or password (HTTP 401)"
+            }
+        }, 1200)
+    }
 
     Box(
         modifier = modifier
@@ -103,7 +139,6 @@ fun LoginScreen(
                     shape = RoundedCornerShape(bottomStart = 38.dp, bottomEnd = 38.dp)
                 )
         ) {
-            // Emblem Gold Decorative Background Ring
             Box(
                 modifier = Modifier
                     .size(200.dp)
@@ -113,14 +148,12 @@ fun LoginScreen(
                     .background(EmblemGold)
             )
 
-            // Header Content: Seal, Title & Portal Status
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 42.dp, start = 24.dp, end = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // University Official Logo Container
                 Surface(
                     shape = CircleShape,
                     color = Color.White,
@@ -157,7 +190,6 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Online Gateway Badge
                 Surface(
                     color = Color.Black.copy(alpha = 0.22f),
                     shape = RoundedCornerShape(12.dp)
@@ -194,7 +226,6 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(205.dp))
 
-            // Main Card
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,12 +243,13 @@ fun LoginScreen(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Segmented Role Switcher: Student vs Staff
                     LoginRoleSwitcher(
                         selectedRole = selectedPortal,
                         onRoleChange = {
                             selectedPortal = it
-                            errorMessage = null
+                            generalError = null
+                            usernameError = null
+                            passwordError = null
                         },
                         isDark = isDark,
                         tileColor = tileColor
@@ -243,34 +275,49 @@ fun LoginScreen(
                         modifier = Modifier.padding(top = 4.dp, bottom = 18.dp)
                     )
 
-                    // Error Message Banner
+                    // General Server Error Banner (401, 403, 500)
                     AnimatedVisibility(
-                        visible = errorMessage != null,
+                        visible = generalError != null,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
                         Surface(
                             color = Color(0xFFEF5350).copy(alpha = 0.12f),
                             shape = RoundedCornerShape(10.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF5350).copy(alpha = 0.3f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF5350).copy(alpha = 0.35f)),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp)
                         ) {
-                            Text(
-                                text = errorMessage.orEmpty(),
-                                color = Color(0xFFD32F2F),
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(10.dp),
-                                textAlign = TextAlign.Center
-                            )
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = Color(0xFFD32F2F),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = generalError.orEmpty(),
+                                    color = Color(0xFFD32F2F),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
 
-                    // Username or Email Input Field
-                    LoginInputField(
+                    // Username or Email Input Field with Inline Error
+                    ValidatedInputField(
                         value = usernameOrEmail,
-                        onValueChange = { usernameOrEmail = it; errorMessage = null },
+                        onValueChange = {
+                            usernameOrEmail = it
+                            if (usernameError != null) usernameError = null
+                            if (generalError != null) generalError = null
+                        },
                         label = if (selectedPortal == 0) "Username or Email" else "Staff ID / University Email",
                         placeholder = if (selectedPortal == 0) "e.g. ayutaya or student@rupp.edu.kh" else "e.g. name@rupp.edu.kh",
                         leadingIcon = Icons.Default.Person,
@@ -280,6 +327,7 @@ fun LoginScreen(
                         borderColor = borderColor,
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
+                        errorMessage = usernameError,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = if (selectedPortal == 0) KeyboardType.Text else KeyboardType.Email,
                             imeAction = ImeAction.Next
@@ -289,12 +337,16 @@ fun LoginScreen(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    // Password Input Field
-                    LoginInputField(
+                    // Password Input Field with Inline Error
+                    ValidatedInputField(
                         value = password,
-                        onValueChange = { password = it; errorMessage = null },
+                        onValueChange = {
+                            password = it
+                            if (passwordError != null) passwordError = null
+                            if (generalError != null) generalError = null
+                        },
                         label = "Password",
                         placeholder = "Enter your password",
                         leadingIcon = Icons.Default.Lock,
@@ -306,22 +358,14 @@ fun LoginScreen(
                         textSecondary = textSecondary,
                         isPassword = true,
                         passwordVisible = passwordVisible,
+                        errorMessage = passwordError,
                         onPasswordToggle = { passwordVisible = !passwordVisible },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
                         ),
                         keyboardActions = KeyboardActions(
-                            onDone = {
-                                focusManager.clearFocus()
-                                val request = LoginRequest(
-                                    usernameOrEmail = usernameOrEmail.trim(),
-                                    password = password
-                                )
-                                executeLogin(request, { isLoading = it }, { errorMessage = it }) {
-                                    onLoginSuccess(request)
-                                }
-                            }
+                            onDone = { validateAndSubmit() }
                         )
                     )
 
@@ -368,18 +412,9 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(22.dp))
 
-                    // Sign In Button (with Gradient & Loading Indicator)
+                    // Sign In Button
                     Button(
-                        onClick = {
-                            focusManager.clearFocus()
-                            val request = LoginRequest(
-                                usernameOrEmail = usernameOrEmail.trim(),
-                                password = password
-                            )
-                            executeLogin(request, { isLoading = it }, { errorMessage = it }) {
-                                onLoginSuccess(request)
-                            }
-                        },
+                        onClick = { validateAndSubmit() },
                         enabled = !isLoading,
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -416,7 +451,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Biometric Authentication Option
+                    // Biometric Option
                     OutlinedButton(
                         onClick = onBiometricClick,
                         shape = RoundedCornerShape(14.dp),
@@ -444,10 +479,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    // First time activation link
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "First time here? ",
                             color = textSecondary,
@@ -468,7 +500,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // -——— ICT Support Helpdesk Link -———
+            // Footer Support
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
@@ -492,7 +524,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // -——— 256-Bit SSL Security Badge -———
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 32.dp)
@@ -514,7 +545,122 @@ fun LoginScreen(
     }
 }
 
-// -——— Sub-Components for Clean Architecture -———
+// -——— Reusable Validated Input Field -———
+
+@Composable
+fun ValidatedInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    leadingIcon: ImageVector,
+    iconCircleColor: Color,
+    accentColor: Color,
+    containerColor: Color,
+    borderColor: Color,
+    textPrimary: Color,
+    textSecondary: Color,
+    modifier: Modifier = Modifier,
+    errorMessage: String? = null,
+    isPassword: Boolean = false,
+    passwordVisible: Boolean = false,
+    onPasswordToggle: () -> Unit = {},
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default
+) {
+    val isError = errorMessage != null
+    val errorColor = Color(0xFFD32F2F)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isError) errorColor else textPrimary,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            isError = isError,
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = textSecondary.copy(alpha = 0.7f),
+                    fontSize = 13.sp
+                )
+            },
+            leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(if (isError) errorColor.copy(alpha = 0.12f) else iconCircleColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = label,
+                        tint = if (isError) errorColor else accentColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            },
+            trailingIcon = if (isPassword) {
+                {
+                    IconButton(onClick = onPasswordToggle) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = if (isError) errorColor else textSecondary
+                        )
+                    }
+                }
+            } else null,
+            visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            shape = RoundedCornerShape(12.dp),
+            supportingText = if (isError) {
+                {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Error",
+                            tint = errorColor,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = errorMessage,
+                            color = errorColor,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            } else null,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = accentColor,
+                unfocusedBorderColor = borderColor,
+                errorBorderColor = errorColor,
+                errorLeadingIconColor = errorColor,
+                focusedTextColor = textPrimary,
+                unfocusedTextColor = textPrimary,
+                focusedContainerColor = containerColor,
+                unfocusedContainerColor = containerColor,
+                errorContainerColor = containerColor,
+                cursorColor = accentColor
+            )
+        )
+    }
+}
 
 @Composable
 private fun LoginRoleSwitcher(
@@ -560,118 +706,6 @@ private fun LoginRoleSwitcher(
     }
 }
 
-@Composable
-private fun LoginInputField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    leadingIcon: ImageVector,
-    iconCircleColor: Color,
-    accentColor: Color,
-    containerColor: Color,
-    borderColor: Color,
-    textPrimary: Color,
-    textSecondary: Color,
-    modifier: Modifier = Modifier,
-    isPassword: Boolean = false,
-    passwordVisible: Boolean = false,
-    onPasswordToggle: () -> Unit = {},
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = textPrimary,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            placeholder = {
-                Text(
-                    text = placeholder,
-                    color = textSecondary.copy(alpha = 0.7f),
-                    fontSize = 13.sp
-                )
-            },
-            leadingIcon = {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(iconCircleColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = leadingIcon,
-                        contentDescription = label,
-                        tint = accentColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            },
-            trailingIcon = if (isPassword) {
-                {
-                    IconButton(onClick = onPasswordToggle) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = textSecondary
-                        )
-                    }
-                }
-            } else null,
-            visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = accentColor,
-                unfocusedBorderColor = borderColor,
-                focusedTextColor = textPrimary,
-                unfocusedTextColor = textPrimary,
-                focusedContainerColor = containerColor,
-                unfocusedContainerColor = containerColor,
-                cursorColor = accentColor
-            )
-        )
-    }
-}
-
-// Authentication validator & simulated async handler
-private fun executeLogin(
-    request: LoginRequest,
-    setLoading: (Boolean) -> Unit,
-    onError: (String) -> Unit,
-    onSuccess: () -> Unit
-) {
-    if (request.usernameOrEmail.isBlank()) {
-        onError("Please enter your username or email")
-        return
-    }
-    if (request.password.isBlank()) {
-        onError("Please enter your password")
-        return
-    }
-    if (request.password.length < 4) {
-        onError("Password must be at least 4 characters")
-        return
-    }
-
-    setLoading(true)
-    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-        setLoading(false)
-        onSuccess()
-    }, 1200)
-}
-
 // -——— Interactive Previews -———
 
 @Preview(name = "Light Mode - RUPP Login", showBackground = true)
@@ -689,4 +723,3 @@ fun LoginScreenDarkPreview() {
         LoginScreen()
     }
 }
-

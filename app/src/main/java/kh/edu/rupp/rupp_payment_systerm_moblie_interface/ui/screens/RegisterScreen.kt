@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,10 +46,11 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.AcademicYear
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.FacultyItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.RegisterRequest
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.*
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.util.ValidationUtils
 
 /**
  * Modern Student Registration Screen for RUPP Payment System
- * Adheres strictly to backend POST /api/v1/auth/register requirements.
+ * Includes field-level validation and backend HTTP 400 error mapping.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +84,16 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    // Dropdown options based on backend seed data
+    // Field-level error messages
+    var firstNameError by remember { mutableStateOf<String?>(null) }
+    var lastNameError by remember { mutableStateOf<String?>(null) }
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
+    var generalError by remember { mutableStateOf<String?>(null) }
+
+    // Dropdown options
     val faculties = remember {
         listOf(
             FacultyItem(1L, "Computer Science", "Faculty of Science"),
@@ -110,9 +119,60 @@ fun RegisterScreen(
 
     var agreeTerms by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val scrollState = rememberScrollState()
+
+    fun validateAndSubmit() {
+        focusManager.clearFocus()
+
+        val fnRes = ValidationUtils.validateName(firstName, "First name")
+        val lnRes = ValidationUtils.validateName(lastName, "Last name")
+        val uRes  = ValidationUtils.validateUsername(username)
+        val eRes  = ValidationUtils.validateEmail(email)
+        val pRes  = ValidationUtils.validatePassword(password)
+        val cpRes = ValidationUtils.validateConfirmPassword(password, confirmPassword)
+
+        firstNameError = fnRes.message
+        lastNameError = lnRes.message
+        usernameError = uRes.message
+        emailError = eRes.message
+        passwordError = pRes.message
+        confirmPasswordError = cpRes.message
+
+        if (!agreeTerms) {
+            generalError = "Please agree to the RUPP Payment System terms of service"
+            return
+        }
+
+        if (!fnRes.isValid || !lnRes.isValid || !uRes.isValid || !eRes.isValid || !pRes.isValid || !cpRes.isValid) {
+            generalError = "Please correct the highlighted errors before submitting"
+            return
+        }
+
+        generalError = null
+        val request = RegisterRequest(
+            username = username.trim(),
+            email = email.trim(),
+            password = password,
+            firstName = firstName.trim().ifBlank { null },
+            lastName = lastName.trim().ifBlank { null },
+            facultyId = selectedFaculty?.id,
+            academicYearId = selectedYear?.id
+        )
+
+        isLoading = true
+        // Simulated API call (or call to repository POST /api/v1/auth/register)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            isLoading = false
+            // Simulate duplicate check (409) or success
+            if (request.username == "admin" || request.username == "test_duplicate") {
+                usernameError = "Username is already taken (HTTP 409)"
+                generalError = "Registration failed: Duplicate username"
+            } else {
+                onRegisterSuccess(request)
+            }
+        }, 1200)
+    }
 
     Box(
         modifier = modifier
@@ -129,7 +189,6 @@ fun RegisterScreen(
                     shape = RoundedCornerShape(bottomStart = 38.dp, bottomEnd = 38.dp)
                 )
         ) {
-            // Gold Watermark
             Box(
                 modifier = Modifier
                     .size(190.dp)
@@ -139,7 +198,6 @@ fun RegisterScreen(
                     .background(EmblemGold)
             )
 
-            // Back button
             IconButton(
                 onClick = onNavigateToLogin,
                 modifier = Modifier
@@ -153,7 +211,6 @@ fun RegisterScreen(
                 )
             }
 
-            // Header Content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -196,7 +253,7 @@ fun RegisterScreen(
             }
         }
 
-        // -——— Main Scrollable Registration Form -———
+        // -——— Main Form Body -———
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -238,38 +295,53 @@ fun RegisterScreen(
                         modifier = Modifier.padding(top = 4.dp, bottom = 18.dp)
                     )
 
-                    // Error Message
+                    // General Error Banner
                     AnimatedVisibility(
-                        visible = errorMessage != null,
+                        visible = generalError != null,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
                         Surface(
                             color = Color(0xFFEF5350).copy(alpha = 0.12f),
                             shape = RoundedCornerShape(10.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF5350).copy(alpha = 0.3f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEF5350).copy(alpha = 0.35f)),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp)
                         ) {
-                            Text(
-                                text = errorMessage.orEmpty(),
-                                color = Color(0xFFD32F2F),
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(10.dp),
-                                textAlign = TextAlign.Center
-                            )
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = Color(0xFFD32F2F),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = generalError.orEmpty(),
+                                    color = Color(0xFFD32F2F),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
 
-                    // First Name & Last Name (Row)
+                    // First Name & Last Name (Row with individual validation)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        RegisterTextField(
+                        ValidatedInputField(
                             value = firstName,
-                            onValueChange = { firstName = it; errorMessage = null },
+                            onValueChange = {
+                                firstName = it
+                                if (firstNameError != null) firstNameError = null
+                                if (generalError != null) generalError = null
+                            },
                             label = "First Name",
                             placeholder = "e.g. Ayutaya",
                             leadingIcon = Icons.Default.Person,
@@ -279,14 +351,19 @@ fun RegisterScreen(
                             borderColor = borderColor,
                             textPrimary = textPrimary,
                             textSecondary = textSecondary,
+                            errorMessage = firstNameError,
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Right) })
                         )
 
-                        RegisterTextField(
+                        ValidatedInputField(
                             value = lastName,
-                            onValueChange = { lastName = it; errorMessage = null },
+                            onValueChange = {
+                                lastName = it
+                                if (lastNameError != null) lastNameError = null
+                                if (generalError != null) generalError = null
+                            },
                             label = "Last Name",
                             placeholder = "e.g. Tab",
                             leadingIcon = Icons.Default.Person,
@@ -296,6 +373,7 @@ fun RegisterScreen(
                             borderColor = borderColor,
                             textPrimary = textPrimary,
                             textSecondary = textSecondary,
+                            errorMessage = lastNameError,
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
@@ -305,9 +383,13 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Username (Required, 3-50 chars)
-                    RegisterTextField(
+                    ValidatedInputField(
                         value = username,
-                        onValueChange = { username = it; errorMessage = null },
+                        onValueChange = {
+                            username = it
+                            if (usernameError != null) usernameError = null
+                            if (generalError != null) generalError = null
+                        },
                         label = "Username * (3-50 characters)",
                         placeholder = "e.g. ayutaya",
                         leadingIcon = Icons.Default.Badge,
@@ -317,6 +399,7 @@ fun RegisterScreen(
                         borderColor = borderColor,
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
+                        errorMessage = usernameError,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                         keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
                     )
@@ -324,9 +407,13 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Email (Required, valid email)
-                    RegisterTextField(
+                    ValidatedInputField(
                         value = email,
-                        onValueChange = { email = it; errorMessage = null },
+                        onValueChange = {
+                            email = it
+                            if (emailError != null) emailError = null
+                            if (generalError != null) generalError = null
+                        },
                         label = "Email Address *",
                         placeholder = "e.g. ayutaya@rupp.edu.kh",
                         leadingIcon = Icons.Default.Email,
@@ -336,6 +423,7 @@ fun RegisterScreen(
                         borderColor = borderColor,
                         textPrimary = textPrimary,
                         textSecondary = textSecondary,
+                        errorMessage = emailError,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next
@@ -346,9 +434,13 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Password (Required, min 6 chars)
-                    RegisterTextField(
+                    ValidatedInputField(
                         value = password,
-                        onValueChange = { password = it; errorMessage = null },
+                        onValueChange = {
+                            password = it
+                            if (passwordError != null) passwordError = null
+                            if (generalError != null) generalError = null
+                        },
                         label = "Password * (min 6 characters)",
                         placeholder = "Create a strong password",
                         leadingIcon = Icons.Default.Lock,
@@ -360,6 +452,7 @@ fun RegisterScreen(
                         textSecondary = textSecondary,
                         isPassword = true,
                         passwordVisible = passwordVisible,
+                        errorMessage = passwordError,
                         onPasswordToggle = { passwordVisible = !passwordVisible },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
@@ -371,9 +464,13 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Confirm Password
-                    RegisterTextField(
+                    ValidatedInputField(
                         value = confirmPassword,
-                        onValueChange = { confirmPassword = it; errorMessage = null },
+                        onValueChange = {
+                            confirmPassword = it
+                            if (confirmPasswordError != null) confirmPasswordError = null
+                            if (generalError != null) generalError = null
+                        },
                         label = "Confirm Password *",
                         placeholder = "Re-enter your password",
                         leadingIcon = Icons.Default.Lock,
@@ -385,12 +482,13 @@ fun RegisterScreen(
                         textSecondary = textSecondary,
                         isPassword = true,
                         passwordVisible = confirmPasswordVisible,
+                        errorMessage = confirmPasswordError,
                         onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
                         ),
-                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+                        keyboardActions = KeyboardActions(onDone = { validateAndSubmit() })
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -508,12 +606,18 @@ fun RegisterScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { agreeTerms = !agreeTerms },
+                            .clickable {
+                                agreeTerms = !agreeTerms
+                                if (agreeTerms && generalError?.contains("terms") == true) generalError = null
+                            },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
                             checked = agreeTerms,
-                            onCheckedChange = { agreeTerms = it },
+                            onCheckedChange = {
+                                agreeTerms = it
+                                if (it && generalError?.contains("terms") == true) generalError = null
+                            },
                             colors = CheckboxDefaults.colors(
                                 checkedColor = accentGreen,
                                 uncheckedColor = textSecondary,
@@ -534,25 +638,7 @@ fun RegisterScreen(
 
                     // Submit Registration Button
                     Button(
-                        onClick = {
-                            focusManager.clearFocus()
-                            validateAndRegister(
-                                username = username.trim(),
-                                email = email.trim(),
-                                password = password,
-                                confirmPassword = confirmPassword,
-                                firstName = firstName.trim(),
-                                lastName = lastName.trim(),
-                                facultyId = selectedFaculty?.id,
-                                academicYearId = selectedYear?.id,
-                                agreeTerms = agreeTerms,
-                                setLoading = { isLoading = it },
-                                onError = { errorMessage = it },
-                                onSuccess = { req ->
-                                    onRegisterSuccess(req)
-                                }
-                            )
-                        },
+                        onClick = { validateAndSubmit() },
                         enabled = !isLoading,
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -656,145 +742,6 @@ fun RegisterScreen(
             }
         }
     }
-}
-
-@Composable
-private fun RegisterTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    leadingIcon: ImageVector,
-    iconCircleColor: Color,
-    accentColor: Color,
-    containerColor: Color,
-    borderColor: Color,
-    textPrimary: Color,
-    textSecondary: Color,
-    modifier: Modifier = Modifier,
-    isPassword: Boolean = false,
-    passwordVisible: Boolean = false,
-    onPasswordToggle: () -> Unit = {},
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = textPrimary,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            placeholder = {
-                Text(
-                    text = placeholder,
-                    color = textSecondary.copy(alpha = 0.7f),
-                    fontSize = 13.sp
-                )
-            },
-            leadingIcon = {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(iconCircleColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = leadingIcon,
-                        contentDescription = label,
-                        tint = accentColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            },
-            trailingIcon = if (isPassword) {
-                {
-                    IconButton(onClick = onPasswordToggle) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = "Toggle password",
-                            tint = textSecondary
-                        )
-                    }
-                }
-            } else null,
-            visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = accentColor,
-                unfocusedBorderColor = borderColor,
-                focusedTextColor = textPrimary,
-                unfocusedTextColor = textPrimary,
-                focusedContainerColor = containerColor,
-                unfocusedContainerColor = containerColor,
-                cursorColor = accentColor
-            )
-        )
-    }
-}
-
-// Validation logic matching backend guide specifications
-private fun validateAndRegister(
-    username: String,
-    email: String,
-    password: String,
-    confirmPassword: String,
-    firstName: String,
-    lastName: String,
-    facultyId: Long?,
-    academicYearId: Long?,
-    agreeTerms: Boolean,
-    setLoading: (Boolean) -> Unit,
-    onError: (String) -> Unit,
-    onSuccess: (RegisterRequest) -> Unit
-) {
-    if (username.length !in 3..50) {
-        onError("Username must be between 3 and 50 characters")
-        return
-    }
-    if (!email.contains("@") || !email.contains(".")) {
-        onError("Please enter a valid email address (e.g. name@rupp.edu.kh)")
-        return
-    }
-    if (password.length < 6) {
-        onError("Password must be at least 6 characters long")
-        return
-    }
-    if (password != confirmPassword) {
-        onError("Passwords do not match")
-        return
-    }
-    if (!agreeTerms) {
-        onError("Please agree to RUPP Payment terms and policy")
-        return
-    }
-
-    val request = RegisterRequest(
-        username = username,
-        email = email,
-        password = password,
-        firstName = firstName.ifBlank { null },
-        lastName = lastName.ifBlank { null },
-        facultyId = facultyId,
-        academicYearId = academicYearId
-    )
-
-    setLoading(true)
-    // Simulate backend call delay (or connects to your Retrofit POST /api/v1/auth/register)
-    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-        setLoading(false)
-        onSuccess(request)
-    }, 1200)
 }
 
 // -——— Compose Previews -———
