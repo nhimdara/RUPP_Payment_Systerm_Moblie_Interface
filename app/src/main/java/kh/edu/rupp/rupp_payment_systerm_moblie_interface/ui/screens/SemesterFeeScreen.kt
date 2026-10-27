@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.TuitionFeeRe
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.sample.SampleData
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.ActiveBadge
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.AppHeader
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.DevicePreviews
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.EmptyState
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.InfoRow
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.SectionCard
@@ -41,6 +43,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.UiState
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.UiStateContent
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.formatApiDate
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.formatUsd
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.readableWidth
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 
 // Everything the academic term screen needs, loaded from:
@@ -100,7 +103,9 @@ private fun SemesterFeeContent(
         .sortedBy { it.semesterNumber }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxHeight()
+            .readableWidth(),
         contentPadding = PaddingValues(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -272,7 +277,7 @@ private val sampleTermFees = AcademicTermFees(
     semesters = SampleData.semesters
 )
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 private fun SemesterFeePreview() {
     RUPP_Payment_Systerm_Moblie_InterfaceTheme {

@@ -32,6 +32,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentRespo
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.TuitionCalculationResponse
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.sample.SampleData
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.AppHeader
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.DevicePreviews
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.BalanceProgress
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.EmptyState
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.InfoRow
@@ -47,6 +48,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.formatPay
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.formatUsd
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.isDarkBackground
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.isPastDue
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.readableWidth
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.CardGradientDark
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.CardGradientLight
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
@@ -83,7 +85,7 @@ private fun FeeBreakdownContent(
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .readableWidth(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -99,6 +101,7 @@ private fun FeeBreakdownContent(
                     text = "Pay ${formatUsd(calculation.remainingBalance)}",
                     onClick = onPayNow,
                     modifier = Modifier
+                        .readableWidth()
                         .navigationBarsPadding()
                         .padding(16.dp)
                 )
@@ -261,7 +264,7 @@ private fun PaymentRow(
     }
 }
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 private fun FeeBreakdownPartialPreview() {
     RUPP_Payment_Systerm_Moblie_InterfaceTheme {
