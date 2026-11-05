@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,7 +39,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +65,8 @@ fun PaymentModal(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var selectedMethod by remember { mutableStateOf(PaymentMethodType.STUDENT_WALLET) }
+    var isProcessing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val isWallet = selectedMethod == PaymentMethodType.STUDENT_WALLET
     val hasEnoughBalance = studentBalance >= feeItem.totalAmount
@@ -75,6 +82,7 @@ fun PaymentModal(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.92f)
                 .navigationBarsPadding()
         ) {
             // 1. Top Header with RUPP Logo & Close Button
@@ -140,7 +148,7 @@ fun PaymentModal(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false)
+                    .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)
@@ -400,8 +408,15 @@ fun PaymentModal(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Button(
-                        onClick = { onConfirmPayment(feeItem, selectedMethod) },
-                        enabled = canPay,
+                        onClick = {
+                            isProcessing = true
+                            coroutineScope.launch {
+                                delay(1200)
+                                isProcessing = false
+                                onConfirmPayment(feeItem, selectedMethod)
+                            }
+                        },
+                        enabled = canPay && !isProcessing,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF1E3F32),
                             disabledContainerColor = Color(0xFF8A9A92)
@@ -412,12 +427,27 @@ fun PaymentModal(
                             vertical = 12.dp
                         )
                     ) {
-                        Text(
-                            text = String.format("Confirm & Pay $%.2f", feeItem.totalAmount),
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if (isProcessing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Processing...",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        } else {
+                            Text(
+                                text = String.format("Confirm & Pay $%.2f", feeItem.totalAmount),
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }

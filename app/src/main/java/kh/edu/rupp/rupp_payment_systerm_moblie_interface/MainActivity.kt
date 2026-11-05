@@ -16,6 +16,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMetho
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentReceipt
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SchoolFeeItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentModal
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.ReceiptModal
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.HomeScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.SchoolFeeListScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.DarkBackground
@@ -43,16 +44,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation() {
-    // 1. Track which screen is currently open
+    // 1. Navigation state
     var currentScreen by remember { mutableStateOf("HOME") }
-
-    // 2. Track which fee the student tapped
     var selectedFee by remember { mutableStateOf<SchoolFeeItem?>(null) }
-
-    // 3. Flag to show or hide the PaymentModal bottom sheet
     var showPaymentModal by remember { mutableStateOf(false) }
 
-    // 4. Navigate between HOME and FEE_PLAN screens
+    // 2. Active Electronic Receipt state
+    var activeReceipt by remember { mutableStateOf<PaymentReceipt?>(null) }
+
+    // 3. Screen Switcher
     when (currentScreen) {
         "HOME" -> {
             HomeScreen(
@@ -60,12 +60,11 @@ fun AppNavigation() {
                     currentScreen = "FEE_PLAN"
                 },
                 onPayTuitionClick = {
-                    // "Pay tuition" shortcut: same as tapping the tuition fee card
                     currentScreen = "FEE_PLAN"
                 },
                 onFeeItemClick = { clickedFee ->
-                    selectedFee = clickedFee       // Save the fee the student tapped
-                    showPaymentModal = true         // Show the payment modal!
+                    selectedFee = clickedFee
+                    showPaymentModal = true
                 }
             )
         }
@@ -76,27 +75,51 @@ fun AppNavigation() {
                     currentScreen = "HOME"
                 },
                 onFeeClick = { clickedFee ->
-                    selectedFee = clickedFee       // Save the fee the student tapped
-                    showPaymentModal = true         // Show the payment modal!
+                    selectedFee = clickedFee
+                    showPaymentModal = true
                 }
             )
         }
     }
 
-    // 5. Show the PaymentModal on top of any screen when triggered
+    // 4. Payment Checkout Modal
     if (showPaymentModal && selectedFee != null) {
         PaymentModal(
             feeItem = selectedFee!!,
             studentBalance = 120.00,
             onDismiss = {
-                // Student closed the sheet → hide it
                 showPaymentModal = false
             },
             onConfirmPayment = { fee, method ->
-                // Student confirmed payment!
-                // For now: close the modal
-                // Next step: open the Payment Status / Receipt screen!
+                // Hide checkout modal
                 showPaymentModal = false
+
+                // Generate official RUPP electronic receipt
+                val timestamp = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date())
+                val randomReceiptId = (1000..9999).random()
+
+                activeReceipt = PaymentReceipt(
+                    receiptNumber = "RCP-2026-$randomReceiptId",
+                    studentName = "Sokha Chan",
+                    studentId = "20260142",
+                    facultyName = "Faculty of Science",
+                    majorName = "Computer Science & Engineering",
+                    feeTitle = fee.title,
+                    totalAmount = fee.totalAmount,
+                    paymentMethod = method,
+                    transactionRef = "TXN-${System.currentTimeMillis().toString().takeLast(8)}",
+                    issueDate = timestamp
+                )
+            }
+        )
+    }
+
+    // 5. Official Electronic Receipt Modal (pops up right after payment is confirmed!)
+    activeReceipt?.let { receipt ->
+        ReceiptModal(
+            receipt = receipt,
+            onDismiss = {
+                activeReceipt = null
             }
         )
     }
