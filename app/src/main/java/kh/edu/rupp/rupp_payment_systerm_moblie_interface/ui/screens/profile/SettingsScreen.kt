@@ -47,8 +47,11 @@ fun SettingsScreen(
     onEditProfile: () -> Unit = {},
     onChangePassword: () -> Unit = {},
     onThemeChange: (AppThemeMode) -> Unit = {},
+    studentName: String? = null,
+    // Called only after the student confirms in the logout dialog
     onLogout: () -> Unit = {}
 ) {
+    var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
     var paymentReminders by rememberSaveable { mutableStateOf(true) }
     var paymentReceipts by rememberSaveable { mutableStateOf(true) }
     var announcements by rememberSaveable { mutableStateOf(false) }
@@ -142,7 +145,7 @@ fun SettingsScreen(
                     title = "Log Out",
                     titleColor = MaterialTheme.colorScheme.error,
                     trailing = {},
-                    onClick = onLogout
+                    onClick = { showLogoutDialog = true }
                 )
             }
 
@@ -154,6 +157,17 @@ fun SettingsScreen(
                 textAlign = TextAlign.Center
             )
         }
+    }
+
+    if (showLogoutDialog) {
+        LogoutConfirmDialog(
+            studentName = studentName,
+            onDismiss = { showLogoutDialog = false },
+            onConfirm = {
+                showLogoutDialog = false
+                onLogout()
+            }
+        )
     }
 }
 
