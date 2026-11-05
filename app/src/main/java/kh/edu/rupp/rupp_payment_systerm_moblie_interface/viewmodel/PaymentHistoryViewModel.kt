@@ -1,17 +1,21 @@
 package kh.edu.rupp.rupp_payment_systerm_moblie_interface.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentCategory
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHistoryItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHistorySummary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentStatus
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.repository.PaymentHistoryRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class PaymentHistoryUiState(
+    val isLoading: Boolean = false,
     val transactions: List<PaymentHistoryItem> = emptyList(),
     val groupedTransactions: Map<String, List<PaymentHistoryItem>> = emptyMap(),
     val selectedCategory: PaymentCategory = PaymentCategory.ALL,
@@ -29,30 +33,35 @@ data class PaymentHistoryUiState(
 class PaymentHistoryViewModel(
     private val repository: PaymentHistoryRepository = PaymentHistoryRepository()
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(PaymentHistoryUiState())
+    private val _uiState = MutableStateFlow(PaymentHistoryUiState(isLoading = true))
     val uiState: StateFlow<PaymentHistoryUiState> = _uiState.asStateFlow()
 
-    private val allPayments = repository.getAllPayments()
+    private var allPayments = repository.getAllPayments()
 
     init {
         loadData()
     }
 
-    private fun loadData() {
-        val summary = repository.getSummary()
-        _uiState.update { state ->
-            val filtered = applyFilters(
-                items = allPayments,
-                category = state.selectedCategory,
-                status = state.selectedStatus,
-                query = state.searchQuery
-            )
-            state.copy(
-                transactions = filtered,
-                groupedTransactions = groupItems(filtered),
-                summary = summary
-            )
+    fun loadData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            delay(600) // Simulate network/database loading delay
+            allPayments = repository.getAllPayments()
+            val summary = repository.getSummary()
+            _uiState.update { state ->
+                val filtered = applyFilters(
+                    items = allPayments,
+                    category = state.selectedCategory,
+                    status = state.selectedStatus,
+                    query = state.searchQuery
+                )
+                state.copy(
+                    isLoading = false,
+                    transactions = filtered,
+                    groupedTransactions = groupItems(filtered),
+                    summary = summary
+                )
+            }
         }
     }
 

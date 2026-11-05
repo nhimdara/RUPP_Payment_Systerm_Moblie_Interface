@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,10 +35,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentCategory
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHistoryItem
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMethod
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentStatus
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardBg
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardBorder
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardElevated
@@ -49,6 +56,22 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextMuted
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextPrimary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextSecondary
 
+// Preview Section
+@Preview(showBackground = true, backgroundColor = 0xFF0E1411)
+@Composable
+fun PaymentHistoryScreenPreview() {
+        RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+            PaymentHistoryFilterSection(
+                selectedCategory = PaymentCategory.values().first(),
+                selectedStatus = null,
+                searchQuery = "",
+                isSearchActive = true,
+                onCategorySelected = {},
+                onStatusSelected = {},
+                onSearchQueryChange = {}
+            )
+        }
+}
 @Composable
 fun PaymentHistoryFilterSection(
     selectedCategory: PaymentCategory,

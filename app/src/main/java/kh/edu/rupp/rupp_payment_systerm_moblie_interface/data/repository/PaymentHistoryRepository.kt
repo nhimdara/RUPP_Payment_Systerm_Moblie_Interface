@@ -6,7 +6,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHisto
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMethod
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentStatus
 
-class PaymentHistoryRepository {
+class   PaymentHistoryRepository {
 
     private val sampleHistory = listOf(
         PaymentHistoryItem(

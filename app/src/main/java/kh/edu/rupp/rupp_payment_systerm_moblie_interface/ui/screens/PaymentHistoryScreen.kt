@@ -17,8 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -36,7 +36,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHistoryItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHistoryCard
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHistoryFilterSection
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHistorySummaryCard
@@ -44,7 +43,6 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHi
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentReceiptBottomSheet
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppBottomNavBar
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppNavTab
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardBorder
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppDarkBg
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppLightGreen
@@ -54,9 +52,23 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextPrimar
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextSecondary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.viewmodel.PaymentHistoryViewModel
 
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF0E1411,
+    name = "PaymentHistory",
+    showSystemUi = false
+)
+
+//@Preview(showBackground = true, backgroundColor = 0xFF0E1411)
+//@Composable
+//fun PaymentHistoryScreenPreview() {
+//    RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+//        PaymentHistoryScreen()
+//    }
+//}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun PaymentHistoryScreen(
     viewModel: PaymentHistoryViewModel = viewModel(),
     onNavigateBack: () -> Unit = {},
@@ -67,7 +79,6 @@ fun PaymentHistoryScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
-
         containerColor = RuppDarkBg,
         topBar = {
             PaymentHistoryTopBar(
@@ -132,22 +143,47 @@ fun PaymentHistoryScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Transactions",
+                        text = "Transactions History",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = RuppTextPrimary
                     )
 
                     Text(
-                        text = "${uiState.transactions.size} records found",
+                        text = "See All",
                         fontSize = 12.sp,
                         color = RuppTextSecondary
                     )
                 }
             }
 
-            // Empty state if no results match
-            if (uiState.transactions.isEmpty()) {
+            // Loading state
+            if (uiState.isLoading) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp, horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = RuppPrimaryGreen,
+                            modifier = Modifier.size(36.dp),
+                            strokeWidth = 3.dp
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Loading RUPP Payment Records...",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = RuppTextSecondary
+                        )
+                    }
+                }
+            } else if (uiState.transactions.isEmpty()) {
                 item {
                     Column(
                         modifier = Modifier
@@ -262,10 +298,3 @@ fun PaymentHistoryScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0E1411)
-@Composable
-fun PaymentHistoryScreenPreview() {
-    RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
-        PaymentHistoryScreen()
-    }
-}

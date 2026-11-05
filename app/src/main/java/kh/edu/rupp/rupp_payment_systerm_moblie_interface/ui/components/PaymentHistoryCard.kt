@@ -43,6 +43,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentCateg
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHistoryItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMethod
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentStatus
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppAbaBlue
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppAccentGreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardBg
@@ -61,6 +62,27 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextMuted
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextPrimary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextSecondary
 
+//@Preview(showBackground = true, backgroundColor = 0xFF0E1411)
+//@Composable
+//fun PaymentHistoryCardPreview() {
+//    RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+//
+//        PaymentHistoryCard(
+//            item = PaymentHistoryItem(
+//                category = PaymentCategory.TUITION,
+//                title = "Semester 1 Tuition Fee",
+//                date = "03 Nov 2026",
+//                time = "10:30 AM",
+//                paymentMethod = PaymentMethod.KHQR,
+//                transactionRef = "TXN123456789",
+//                isDeduction = true,
+//                amount = 250.00,
+//                monthGroup = "March"
+//            ),
+//            onClick = {}
+//        )
+//    }
+//}
 
 @Composable
 fun PaymentHistoryCard(
