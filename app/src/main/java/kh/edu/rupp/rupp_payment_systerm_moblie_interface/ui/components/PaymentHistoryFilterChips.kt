@@ -1,8 +1,12 @@
 package kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,18 +19,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,10 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentCategory
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentHistoryItem
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMethod
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentStatus
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardBg
@@ -56,22 +56,22 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextMuted
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextPrimary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextSecondary
 
-// Preview Section
 @Preview(showBackground = true, backgroundColor = 0xFF0E1411)
 @Composable
-fun PaymentHistoryScreenPreview() {
-        RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
-            PaymentHistoryFilterSection(
-                selectedCategory = PaymentCategory.values().first(),
-                selectedStatus = null,
-                searchQuery = "",
-                isSearchActive = true,
-                onCategorySelected = {},
-                onStatusSelected = {},
-                onSearchQueryChange = {}
-            )
-        }
+fun PaymentHistoryFilterSectionPreview() {
+    RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+        PaymentHistoryFilterSection(
+            selectedCategory = PaymentCategory.ALL,
+            selectedStatus = null,
+            searchQuery = "",
+            isSearchActive = true,
+            onCategorySelected = {},
+            onStatusSelected = {},
+            onSearchQueryChange = {}
+        )
+    }
 }
+
 @Composable
 fun PaymentHistoryFilterSection(
     selectedCategory: PaymentCategory,
@@ -85,22 +85,26 @@ fun PaymentHistoryFilterSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Expandable Search Field
+        // Sleek Animated Search Field
         AnimatedVisibility(
             visible = isSearchActive,
-            enter = fadeIn(),
-            exit = fadeOut()
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(RuppCardElevated)
-                    .border(1.dp, RuppCardBorder, RoundedCornerShape(14.dp))
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .border(
+                        width = 1.dp,
+                        color = if (searchQuery.isNotEmpty()) RuppPrimaryGreen.copy(alpha = 0.6f) else RuppCardBorder,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -109,16 +113,16 @@ fun PaymentHistoryFilterSection(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = RuppTextSecondary,
+                        tint = if (searchQuery.isNotEmpty()) RuppLightGreen else RuppTextSecondary,
                         modifier = Modifier.size(18.dp)
                     )
 
                     Box(modifier = Modifier.weight(1f)) {
                         if (searchQuery.isEmpty()) {
                             Text(
-                                text = "Search tuition, exam, ref number...",
+                                text = "Search by title, invoice #, ref code...",
                                 color = RuppTextMuted,
-                                fontSize = 14.sp
+                                fontSize = 13.5.sp
                             )
                         }
                         BasicTextField(
@@ -127,7 +131,8 @@ fun PaymentHistoryFilterSection(
                             singleLine = true,
                             textStyle = TextStyle(
                                 color = RuppTextPrimary,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
                             ),
                             cursorBrush = SolidColor(RuppPrimaryGreen),
                             modifier = Modifier.fillMaxWidth()
@@ -135,14 +140,21 @@ fun PaymentHistoryFilterSection(
                     }
 
                     if (searchQuery.isNotEmpty()) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear",
-                            tint = RuppTextSecondary,
+                        Box(
                             modifier = Modifier
-                                .size(18.dp)
-                                .clickable { onSearchQueryChange("") }
-                        )
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .background(RuppCardBg)
+                                .clickable { onSearchQueryChange("") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear",
+                                tint = RuppTextSecondary,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -157,19 +169,26 @@ fun PaymentHistoryFilterSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PaymentCategory.values().forEach { category ->
+            PaymentCategory.entries.forEach { category ->
                 val isSelected = selectedCategory == category
+
+                val chipBgColor by animateColorAsState(
+                    targetValue = if (isSelected) RuppPrimaryGreen else RuppCardBg,
+                    animationSpec = tween(150),
+                    label = "CategoryChipBg"
+                )
+
+                val chipBorderColor by animateColorAsState(
+                    targetValue = if (isSelected) RuppLightGreen else RuppCardBorder,
+                    animationSpec = tween(150),
+                    label = "CategoryChipBorder"
+                )
+
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(
-                            if (isSelected) RuppPrimaryGreen else RuppCardBg
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) RuppLightGreen else RuppCardBorder,
-                            shape = RoundedCornerShape(20.dp)
-                        )
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(chipBgColor)
+                        .border(1.dp, chipBorderColor, RoundedCornerShape(14.dp))
                         .clickable { onCategorySelected(category) }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
@@ -183,7 +202,7 @@ fun PaymentHistoryFilterSection(
             }
         }
 
-        // Status Filter Chips (All, Completed, Pending, Failed)
+        // Minimal Status Filter Chips Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -192,126 +211,109 @@ fun PaymentHistoryFilterSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // "All Status" pill
+            // Label tag for Status
+            Text(
+                text = "Status:",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = RuppTextMuted,
+                modifier = Modifier.padding(end = 2.dp)
+            )
+
+            // "All" Pill
             val isAllStatus = selectedStatus == null
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isAllStatus) RuppCardElevated else Color.Transparent)
-                    .border(
-                        1.dp,
-                        if (isAllStatus) RuppPrimaryGreen.copy(alpha = 0.5f) else RuppCardBorder.copy(alpha = 0.6f),
-                        RoundedCornerShape(10.dp)
-                    )
-                    .clickable { onStatusSelected(null) }
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-            ) {
-                Text(
-                    text = "All Status",
-                    fontSize = 11.sp,
-                    color = if (isAllStatus) RuppLightGreen else RuppTextMuted,
-                    fontWeight = FontWeight.Medium
+            FilterStatusPill(
+                label = "All",
+                isSelected = isAllStatus,
+                activeColor = RuppLightGreen,
+                activeBg = RuppCardElevated,
+                onClick = { onStatusSelected(null) }
+            )
+
+            // "Completed" Pill
+            val isCompleted = selectedStatus == PaymentStatus.COMPLETED
+            FilterStatusPill(
+                label = "Completed",
+                isSelected = isCompleted,
+                activeColor = RuppStatusSuccess,
+                activeBg = RuppStatusSuccess.copy(alpha = 0.15f),
+                dotColor = RuppStatusSuccess,
+                onClick = { onStatusSelected(PaymentStatus.COMPLETED) }
+            )
+
+            // "Pending" Pill
+            val isPending = selectedStatus == PaymentStatus.PENDING
+            FilterStatusPill(
+                label = "Pending",
+                isSelected = isPending,
+                activeColor = RuppStatusPending,
+                activeBg = RuppStatusPending.copy(alpha = 0.15f),
+                dotColor = RuppStatusPending,
+                onClick = { onStatusSelected(PaymentStatus.PENDING) }
+            )
+
+            // "Failed" Pill
+            val isFailed = selectedStatus == PaymentStatus.FAILED
+            FilterStatusPill(
+                label = "Failed",
+                isSelected = isFailed,
+                activeColor = RuppStatusFailed,
+                activeBg = RuppStatusFailed.copy(alpha = 0.15f),
+                dotColor = RuppStatusFailed,
+                onClick = { onStatusSelected(PaymentStatus.FAILED) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilterStatusPill(
+    label: String,
+    isSelected: Boolean,
+    activeColor: Color,
+    activeBg: Color,
+    dotColor: Color? = null,
+    onClick: () -> Unit
+) {
+    val bgColor by animateColorAsState(
+        targetValue = if (isSelected) activeBg else Color.Transparent,
+        animationSpec = tween(150),
+        label = "StatusPillBg"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) activeColor else RuppCardBorder.copy(alpha = 0.5f),
+        animationSpec = tween(150),
+        label = "StatusPillBorder"
+    )
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(bgColor)
+            .border(1.dp, borderColor, RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            if (dotColor != null) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) dotColor else RuppTextMuted.copy(alpha = 0.6f))
                 )
             }
 
-            // Completed
-            val isCompleted = selectedStatus == PaymentStatus.COMPLETED
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isCompleted) RuppStatusSuccess.copy(alpha = 0.15f) else Color.Transparent)
-                    .border(
-                        1.dp,
-                        if (isCompleted) RuppStatusSuccess else RuppCardBorder.copy(alpha = 0.6f),
-                        RoundedCornerShape(10.dp)
-                    )
-                    .clickable { onStatusSelected(PaymentStatus.COMPLETED) }
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(RuppStatusSuccess)
-                    )
-                    Text(
-                        text = "Completed",
-                        fontSize = 11.sp,
-                        color = if (isCompleted) RuppStatusSuccess else RuppTextMuted,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            // Pending
-            val isPending = selectedStatus == PaymentStatus.PENDING
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isPending) RuppStatusPending.copy(alpha = 0.15f) else Color.Transparent)
-                    .border(
-                        1.dp,
-                        if (isPending) RuppStatusPending else RuppCardBorder.copy(alpha = 0.6f),
-                        RoundedCornerShape(10.dp)
-                    )
-                    .clickable { onStatusSelected(PaymentStatus.PENDING) }
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(RuppStatusPending)
-                    )
-                    Text(
-                        text = "Pending",
-                        fontSize = 11.sp,
-                        color = if (isPending) RuppStatusPending else RuppTextMuted,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            // Failed
-            val isFailed = selectedStatus == PaymentStatus.FAILED
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isFailed) RuppStatusFailed.copy(alpha = 0.15f) else Color.Transparent)
-                    .border(
-                        1.dp,
-                        if (isFailed) RuppStatusFailed else RuppCardBorder.copy(alpha = 0.6f),
-                        RoundedCornerShape(10.dp)
-                    )
-                    .clickable { onStatusSelected(PaymentStatus.FAILED) }
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(RuppStatusFailed)
-                    )
-                    Text(
-                        text = "Failed",
-                        fontSize = 11.sp,
-                        color = if (isFailed) RuppStatusFailed else RuppTextMuted,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) activeColor else RuppTextMuted
+            )
         }
     }
 }

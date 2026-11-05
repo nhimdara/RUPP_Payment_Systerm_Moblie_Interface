@@ -41,8 +41,7 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHi
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHistorySummaryCard
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentHistoryTopBar
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentReceiptBottomSheet
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppBottomNavBar
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppNavTab
+
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppCardBorder
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppDarkBg
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppLightGreen
@@ -72,7 +71,6 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.viewmodel.PaymentHistor
 fun PaymentHistoryScreen(
     viewModel: PaymentHistoryViewModel = viewModel(),
     onNavigateBack: () -> Unit = {},
-    onTabSelected: (RuppNavTab) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -88,12 +86,6 @@ fun PaymentHistoryScreen(
                 onBackClick = onNavigateBack,
                 onSearchToggle = { viewModel.toggleSearch() },
                 onFilterClick = {}
-            )
-        },
-        bottomBar = {
-            RuppBottomNavBar(
-                selectedTab = RuppNavTab.ANALYTIC,
-                onTabSelected = onTabSelected
             )
         }
     ) { innerPadding ->
