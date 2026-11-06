@@ -8,8 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
-<<<<<<< HEAD
-<<<<<<< HEAD
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
@@ -17,19 +15,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.navigation.MainAppNavigation
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.ForgotPasswordScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoadingScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoginScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.RegisterScreen
-=======
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.navigation.MainAppNavigation
->>>>>>> origin/HomeAndNavigation
-=======
-import androidx.compose.ui.Modifier
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.PaymentHistoryScreen
->>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 
 class MainActivity : ComponentActivity() {
@@ -38,12 +28,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-<<<<<<< HEAD
-<<<<<<< HEAD
             RUPP_Payment_Systerm_Moblie_InterfaceTheme {
                 var currentScreen by remember { mutableStateOf("loading") }
 
-                BackHandler(enabled = currentScreen != "login" && currentScreen != "loading") {
+                BackHandler(enabled = currentScreen != "login" && currentScreen != "loading" && currentScreen != "main") {
                     currentScreen = "login"
                 }
 
@@ -64,7 +52,8 @@ class MainActivity : ComponentActivity() {
                                 LoginScreen(
                                     modifier = Modifier.padding(innerPadding),
                                     onLoginSuccess = { request ->
-                                        Toast.makeText(this, "Logged in as ${request.usernameOrEmail}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "Welcome, ${request.usernameOrEmail}!", Toast.LENGTH_SHORT).show()
+                                        currentScreen = "main"
                                     },
                                     onRegisterClick = {
                                         currentScreen = "register"
@@ -73,7 +62,8 @@ class MainActivity : ComponentActivity() {
                                         currentScreen = "forgot_password"
                                     },
                                     onBiometricClick = {
-                                        Toast.makeText(this, "Biometric login triggered", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "Biometric authentication successful!", Toast.LENGTH_SHORT).show()
+                                        currentScreen = "main"
                                     },
                                     onContactSupportClick = {
                                         Toast.makeText(this, "Opening RUPP ICT Helpdesk", Toast.LENGTH_SHORT).show()
@@ -84,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                 RegisterScreen(
                                     modifier = Modifier.padding(innerPadding),
                                     onRegisterSuccess = { request ->
-                                        Toast.makeText(this, "Account created for ${request.username}!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(this, "Account created for ${request.username}! Please sign in.", Toast.LENGTH_LONG).show()
                                         currentScreen = "login"
                                     },
                                     onNavigateToLogin = {
@@ -110,23 +100,13 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+                            "main" -> {
+                                MainAppNavigation()
+                            }
                         }
                     }
-=======
-            RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    MainAppNavigation()
->>>>>>> origin/HomeAndNavigation
                 }
-=======
-            RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
-                PaymentHistoryScreen()
->>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
             }
         }
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list

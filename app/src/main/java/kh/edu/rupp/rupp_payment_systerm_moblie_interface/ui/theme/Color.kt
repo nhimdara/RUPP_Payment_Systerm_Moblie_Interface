@@ -52,11 +52,7 @@ val LightNavBar        = Color(0xFFFFFFFF)
 val LightNavSelected   = Color(0xFFE3EDE3)
 val LightNavUnselected = Color(0xFF6B7280)
 val LightTextPrimary   = Color(0xFF1B1B1B)
-<<<<<<< HEAD
-val LightTextSecondary = Color(0xFF757575)
-=======
 val LightTextSecondary = Color(0xFF6B7280)
->>>>>>> origin/HomeAndNavigation
 
 // Dark
 val DarkBackground     = Color(0xFF2B2B2B)
@@ -67,11 +63,7 @@ val DarkIconCircle     = Color(0xFF2A4A2C)
 val DarkNavBar         = Color(0xFF1F1F1F)
 val DarkNavSelected    = Color(0xFF2A4A2C)
 val DarkTextPrimary    = Color(0xFFFFFFFF)
-<<<<<<< HEAD
 val DarkTextSecondary  = Color(0xFF9E9E9E)
-=======
-val DarkTextSecondary  = Color(0xFFB0B0B0)
->>>>>>> origin/HomeAndNavigation
 
 // Shared / brand
 val GreenPrimary       = Color(0xFF2E7D32) // icons, selected nav (light)
@@ -88,27 +80,10 @@ val HeaderTop          = Color(0xFF1F2F2A)
 val HeaderBottom       = Color(0xFF2E7D32)
 val HeaderOverlay      = Brush.verticalGradient(listOf(HeaderTop.copy(alpha = .85f), HeaderBottom))
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// -——— ID card gradients -———
-val CardGradientLight  = Brush.linearGradient(listOf(Color(0xFF2E7D32), CardNavy))
-val CardGradientDark   = Brush.linearGradient(listOf(Color(0xFF4CAF50), CardNavy))
-
-// -——— Default template colors -———
-val Purple80           = Color(0xFFD0BCFF)
-val PurpleGrey80       = Color(0xFFCCC2DC)
-val Pink80             = Color(0xFFEFB8C8)
-=======
 // ID card gradients
 val CardGradientLight  = Brush.linearGradient(listOf(Color(0xFF2E7D32), CardNavy))
 val CardGradientDark   = Brush.linearGradient(listOf(Color(0xFF4CAF50), CardNavy))
 
-=======
-// ID card gradients
-val CardGradientLight  = Brush.linearGradient(listOf(Color(0xFF2E7D32), CardNavy))
-val CardGradientDark   = Brush.linearGradient(listOf(Color(0xFF4CAF50), CardNavy))
-
->>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
 // Fallback Material3 definitions
 val Purple80 = RuppLightGreen
 val PurpleGrey80 = RuppTextSecondary
@@ -116,7 +91,3 @@ val Pink80 = RuppPrimaryGreen
 val Purple40 = RuppPrimaryGreen
 val PurpleGrey40 = RuppCardBg
 val Pink40 = RuppDarkBg
-<<<<<<< HEAD
->>>>>>> origin/HomeAndNavigation
-=======
->>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list

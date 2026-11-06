@@ -79,6 +79,8 @@ fun PaymentStatusBadge(
         PaymentStatus.PENDING -> "Pending" to Amber
         PaymentStatus.VERIFIED -> "Verified" to Blue
         PaymentStatus.CONFIRMED -> "Confirmed" to Green
+        PaymentStatus.COMPLETED -> "Completed" to Green
+        PaymentStatus.FAILED -> "Failed" to Red
         PaymentStatus.REJECTED -> "Rejected" to Red
         PaymentStatus.CANCELLED -> "Cancelled" to Red
         PaymentStatus.REFUNDED -> "Refunded" to Grey

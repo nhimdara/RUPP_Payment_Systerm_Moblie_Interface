@@ -69,10 +69,6 @@ fun RUPP_Payment_Systerm_Moblie_InterfaceTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-<<<<<<< HEAD
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-=======
         darkTheme -> RuppDarkColorScheme
         else -> RuppLightColorScheme
     }
@@ -88,7 +84,6 @@ fun RUPP_Payment_Systerm_Moblie_InterfaceTheme(
                 }
             }
         }
->>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
     }
 
     MaterialTheme(

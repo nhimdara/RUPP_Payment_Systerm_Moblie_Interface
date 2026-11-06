@@ -229,7 +229,9 @@ fun PaymentHistoryCard(
 @Composable
 fun StatusBadge(status: PaymentStatus) {
     val (bgColor, textColor, icon) = when (status) {
-        PaymentStatus.COMPLETED -> Triple(
+        PaymentStatus.COMPLETED,
+        PaymentStatus.CONFIRMED,
+        PaymentStatus.VERIFIED -> Triple(
             RuppStatusSuccessBg,
             RuppStatusSuccess,
             Icons.Default.Check
@@ -239,7 +241,10 @@ fun StatusBadge(status: PaymentStatus) {
             RuppStatusPending,
             Icons.Default.Schedule
         )
-        PaymentStatus.FAILED -> Triple(
+        PaymentStatus.FAILED,
+        PaymentStatus.REJECTED,
+        PaymentStatus.CANCELLED,
+        PaymentStatus.REFUNDED -> Triple(
             RuppStatusFailedBg,
             RuppStatusFailed,
             Icons.Default.Close

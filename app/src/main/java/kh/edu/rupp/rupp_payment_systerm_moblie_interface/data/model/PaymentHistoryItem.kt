@@ -9,12 +9,6 @@ enum class PaymentCategory(val displayName: String) {
     TOP_UP("Top-up")
 }
 
-enum class PaymentStatus(val displayName: String) {
-    COMPLETED("Completed"),
-    PENDING("Pending"),
-    FAILED("Failed")
-}
-
 enum class PaymentMethod(val displayName: String) {
     KHQR("Bakong KHQR"),
     ABA_PAY("ABA Mobile"),
