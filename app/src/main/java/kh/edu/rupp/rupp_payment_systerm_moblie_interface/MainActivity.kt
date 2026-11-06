@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
+<<<<<<< HEAD
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
@@ -19,6 +20,11 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.ForgotPasswo
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoadingScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoginScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.RegisterScreen
+=======
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.navigation.MainAppNavigation
+>>>>>>> origin/HomeAndNavigation
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,6 +32,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+<<<<<<< HEAD
             RUPP_Payment_Systerm_Moblie_InterfaceTheme {
                 var currentScreen by remember { mutableStateOf("loading") }
 
@@ -98,6 +105,11 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+=======
+            RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    MainAppNavigation()
+>>>>>>> origin/HomeAndNavigation
                 }
             }
         }
