@@ -67,12 +67,14 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.ReceiptMo
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppBottomNavBar
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppNavTab
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.StudentProfileSummaryCard
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.TopUpModal
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.CampusCardTab
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.FinancialAnalyticsScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.HomeScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.NotificationsScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.SchoolFeeListScreen
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.SmartCampusCardsScreen
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.profile.StudentProfileScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.ActiveMint
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.GreenAccentDark
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.GreenPrimary
@@ -88,23 +90,32 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppLightGreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppPrimaryGreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextPrimary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RuppTextSecondary
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.mutableDoubleStateOf
 
 /**
  * Destinations for secondary or detail screens.
  */
 enum class SubDestination {
-    NOTIFICATIONS
+    NOTIFICATIONS,
+    CAMPUS_CARDS,
+    FINANCIAL_ANALYTICS
 }
 
 /**
  * Master App Navigation Component.
  * Orchestrates seamless switching between Home, Tuition, History, and Profile tabs,
- * handles child screen transitions (such as Notifications), and manages Android system back events.
+ * handles child screen transitions (such as Notifications, Campus Cards, and Financial Analytics),
+ * and manages Android system back events.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppNavigation(
     initialTab: RuppNavTab = RuppNavTab.HOME,
-    student: StudentProfile = SampleStudentProfile.leangkhai,
+    student: StudentProfile = SampleStudentProfile.student,
     summary: TuitionDashboardSummary = SampleDashboardData.tuitionSummary,
     modifier: Modifier = Modifier
 ) {
@@ -114,6 +125,10 @@ fun MainAppNavigation(
     var selectedFee by remember { mutableStateOf<SchoolFeeItem?>(null) }
     var showPaymentModal by remember { mutableStateOf(false) }
     var activeReceipt by remember { mutableStateOf<PaymentReceipt?>(null) }
+    var showTopUpModal by remember { mutableStateOf(false) }
+    var studentBalance by remember { mutableDoubleStateOf(student.balance) }
+    var selectedCampusCardTab by remember { mutableStateOf(CampusCardTab.STUDENT_ID) }
+    var isDarkMode by remember { mutableStateOf(false) }
 
     val unreadCount = notifications.count { !it.isRead }
 
@@ -129,7 +144,7 @@ fun MainAppNavigation(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
-            // Keep bottom bar visible on root tabs, hide on standalone screens like Notifications
+            // Keep bottom bar visible on root tabs, hide on standalone screens like Notifications, Campus Cards, Analytics
             if (currentSubDestination == null) {
                 RuppBottomNavBar(
                     selectedTab = selectedTab,
@@ -154,11 +169,30 @@ fun MainAppNavigation(
                     )
                 }
 
+                SubDestination.CAMPUS_CARDS -> {
+                    SmartCampusCardsScreen(
+                        student = student,
+                        initialTab = selectedCampusCardTab,
+                        onNavigateBack = { currentSubDestination = null },
+                        modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                    )
+                }
+
+                SubDestination.FINANCIAL_ANALYTICS -> {
+                    FinancialAnalyticsScreen(
+                        onNavigateBack = { currentSubDestination = null },
+                        modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                    )
+                }
+
                 RuppNavTab.HOME -> {
                     HomeScreen(
                         student = student,
                         summary = summary,
+                        studentBalance = studentBalance,
                         unreadNotificationCount = unreadCount,
+                        isDarkMode = isDarkMode,
+                        onToggleDarkMode = { isDarkMode = !isDarkMode },
                         onNavigateToNotifications = {
                             currentSubDestination = SubDestination.NOTIFICATIONS
                         },
@@ -173,6 +207,20 @@ fun MainAppNavigation(
                         },
                         onNavigateToPayment = {
                             selectedTab = RuppNavTab.TUITION
+                        },
+                        onNavigateToCampusCards = { tabName ->
+                            selectedCampusCardTab = when {
+                                tabName.contains("Moto", ignoreCase = true) -> CampusCardTab.MOTO_PARK
+                                tabName.contains("Library", ignoreCase = true) -> CampusCardTab.LIBRARY_PASS
+                                else -> CampusCardTab.STUDENT_ID
+                            }
+                            currentSubDestination = SubDestination.CAMPUS_CARDS
+                        },
+                        onNavigateToAnalytics = {
+                            currentSubDestination = SubDestination.FINANCIAL_ANALYTICS
+                        },
+                        onOpenTopUp = {
+                            showTopUpModal = true
                         },
                         modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                     )
@@ -197,8 +245,10 @@ fun MainAppNavigation(
                 }
 
                 RuppNavTab.PROFILE -> {
-                    ProfileTabContent(
+                    StudentProfileScreen(
                         student = student,
+                        isDarkMode = isDarkMode,
+                        onToggleDarkMode = { isDarkMode = it },
                         modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                     )
                 }
@@ -208,16 +258,31 @@ fun MainAppNavigation(
         }
     }
 
+    // Top Up Student Balance Modal Bottom Sheet (Image 5)
+    if (showTopUpModal) {
+        TopUpModal(
+            currentBalance = studentBalance,
+            onDismiss = { showTopUpModal = false },
+            onTopUpConfirmed = { amount ->
+                studentBalance += amount
+                showTopUpModal = false
+            }
+        )
+    }
+
     // Modal Checkout: Tab Ayutaya's Payment Method Selection & Balance Validation
     if (showPaymentModal && selectedFee != null) {
         PaymentModal(
             feeItem = selectedFee!!,
-            studentBalance = 120.00,
+            studentBalance = studentBalance,
             onDismiss = {
                 showPaymentModal = false
             },
             onConfirmPayment = { fee, method ->
                 showPaymentModal = false
+                if (method == PaymentMethodType.STUDENT_WALLET) {
+                    studentBalance = (studentBalance - fee.totalAmount).coerceAtLeast(0.0)
+                }
                 val timestamp = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date())
                 val randomReceiptId = (1000..9999).random()
 

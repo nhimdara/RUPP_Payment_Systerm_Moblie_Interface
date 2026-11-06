@@ -44,3 +44,4 @@ data class PaymentReceipt(
     val amountInKhr: Long
         get() = (totalAmount * 4100).toLong()
 }
+

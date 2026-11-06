@@ -82,3 +82,4 @@ object FeeRepository {
     fun getTotalToPayAmount(): Double =
         getToPayFees().sumOf { it.totalAmount }
 }
+
