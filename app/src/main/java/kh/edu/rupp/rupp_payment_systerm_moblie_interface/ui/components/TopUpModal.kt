@@ -452,3 +452,4 @@ private fun QrCornerPattern() {
         }
     }
 }
+

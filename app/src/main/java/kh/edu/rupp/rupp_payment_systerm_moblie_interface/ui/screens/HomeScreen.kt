@@ -53,6 +53,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.R
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMethodType
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentReceipt
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SampleDashboardData
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SampleStudentProfile
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.StudentProfile
@@ -75,6 +77,7 @@ fun HomeScreen(
     onNavigateToCampusCards: (String) -> Unit = {},
     onNavigateToAnalytics: () -> Unit = {},
     onOpenTopUp: () -> Unit = {},
+    onViewReceipt: (PaymentReceipt) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val toPayFees = FeeRepository.getToPayFees()
@@ -647,20 +650,50 @@ fun HomeScreen(
                     )
                 }
 
-                // Receipt 1
+                // Receipt 1 (Matches Image 6 Official Electronic Receipt)
                 RecentReceiptItem(
                     title = "Laboratory & Library Fee - 2026–2027 (Semester 1)",
-                    ref = "RUPP-RCPT-2026-0876 · 2026-10-26",
+                    ref = "RUPP-RCPT-2026-8076 · 2026-10-26 12:35:39",
                     amount = "+$25.00",
-                    onClick = onNavigateToHistory
+                    onClick = {
+                        onViewReceipt(
+                            PaymentReceipt(
+                                receiptNumber = "RUPP-RCPT-2026-8076",
+                                studentName = student.fullName,
+                                studentId = student.studentId,
+                                facultyName = student.faculty,
+                                majorName = student.major,
+                                feeTitle = "Laboratory & Library Fee - 2026–2027 (Semester 1)",
+                                totalAmount = 25.00,
+                                paymentMethod = PaymentMethodType.STUDENT_WALLET,
+                                transactionRef = "RUPP-TXN-1788819",
+                                issueDate = "2026-10-26 12:35:39"
+                            )
+                        )
+                    }
                 )
 
                 // Receipt 2
                 RecentReceiptItem(
                     title = "Entrance & Placement Test Fee (Academic Year 2026-2027)",
-                    ref = "RUPP-RCPT-2026-0413 · 2026-09-11",
+                    ref = "RUPP-RCPT-2026-0413 · 2026-09-11 09:15:00",
                     amount = "+$150.00",
-                    onClick = onNavigateToHistory
+                    onClick = {
+                        onViewReceipt(
+                            PaymentReceipt(
+                                receiptNumber = "RUPP-RCPT-2026-0413",
+                                studentName = student.fullName,
+                                studentId = student.studentId,
+                                facultyName = student.faculty,
+                                majorName = student.major,
+                                feeTitle = "Entrance & Placement Test Fee (Academic Year 2026-2027)",
+                                totalAmount = 150.00,
+                                paymentMethod = PaymentMethodType.KHQR_BAKONG,
+                                transactionRef = "RUPP-TXN-1652490",
+                                issueDate = "2026-09-11 09:15:00"
+                            )
+                        )
+                    }
                 )
             }
         }

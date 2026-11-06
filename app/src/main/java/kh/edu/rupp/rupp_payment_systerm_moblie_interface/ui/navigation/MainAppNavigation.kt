@@ -222,6 +222,9 @@ fun MainAppNavigation(
                         onOpenTopUp = {
                             showTopUpModal = true
                         },
+                        onViewReceipt = { receipt ->
+                            activeReceipt = receipt
+                        },
                         modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                     )
                 }
