@@ -149,6 +149,7 @@ fun MainAppNavigation(
                 RuppBottomNavBar(
                     selectedTab = selectedTab,
                     unreadNotificationCount = unreadCount,
+                    isDarkMode = isDarkMode,
                     onTabSelected = { tab ->
                         selectedTab = tab
                         currentSubDestination = null
@@ -231,13 +232,16 @@ fun MainAppNavigation(
 
                 RuppNavTab.TUITION -> {
                     SchoolFeeListScreen(
+                        student = student,
+                        isDarkMode = isDarkMode,
                         onNavigateBack = {
                             selectedTab = RuppNavTab.HOME
                         },
                         onFeeClick = { fee ->
                             selectedFee = fee
                             showPaymentModal = true
-                        }
+                        },
+                        modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                     )
                 }
 

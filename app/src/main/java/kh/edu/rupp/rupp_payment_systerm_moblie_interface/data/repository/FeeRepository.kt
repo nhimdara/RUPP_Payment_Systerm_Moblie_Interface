@@ -42,11 +42,11 @@ object FeeRepository {
         SchoolFeeItem(
             feeStructureId = 4,
             title = "Laboratory & Library Fee",
-            subtitle = "Due 20 Dec 2026",
+            subtitle = "Paid on 26 Oct 2026",
             category = FeeCategory.LAB_FEE,
             totalAmount = 25.0,
-            dueDate = "20 Dec 2026",
-            status = FeeStatus.UNPAID,
+            dueDate = "26 Oct 2026",
+            status = FeeStatus.PAID,
             description = "Computer Science Laboratory Maintenance & Hun Sen Digital Library Access",
             credits = 0
         ),

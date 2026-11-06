@@ -79,13 +79,13 @@ fun RuppBottomNavBar(
     selectedTab: RuppNavTab = RuppNavTab.HOME,
     onTabSelected: (RuppNavTab) -> Unit = {},
     unreadNotificationCount: Int = 0,
+    isDarkMode: Boolean = isSystemInDarkTheme(),
     modifier: Modifier = Modifier
 ) {
-    val isDark = isSystemInDarkTheme()
-    val navBgColor = if (isDark) RuppDarkBg else LightNavBar
-    val borderColor = if (isDark) RuppCardBorder else Color(0xFFE2E8F0)
-    val activeColor = if (isDark) RuppLightGreen else GreenPrimary
-    val inactiveColor = if (isDark) RuppTextMuted else LightNavUnselected
+    val navBgColor = if (isDarkMode) RuppDarkBg else LightNavBar
+    val borderColor = if (isDarkMode) RuppCardBorder else Color(0xFFE2E8F0)
+    val activeColor = if (isDarkMode) RuppLightGreen else GreenPrimary
+    val inactiveColor = if (isDarkMode) RuppTextMuted else LightNavUnselected
 
     Column(
         modifier = modifier
