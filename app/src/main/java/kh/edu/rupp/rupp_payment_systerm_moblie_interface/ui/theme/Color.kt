@@ -89,6 +89,7 @@ val HeaderBottom       = Color(0xFF2E7D32)
 val HeaderOverlay      = Brush.verticalGradient(listOf(HeaderTop.copy(alpha = .85f), HeaderBottom))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // -——— ID card gradients -———
 val CardGradientLight  = Brush.linearGradient(listOf(Color(0xFF2E7D32), CardNavy))
 val CardGradientDark   = Brush.linearGradient(listOf(Color(0xFF4CAF50), CardNavy))
@@ -102,6 +103,12 @@ val Pink80             = Color(0xFFEFB8C8)
 val CardGradientLight  = Brush.linearGradient(listOf(Color(0xFF2E7D32), CardNavy))
 val CardGradientDark   = Brush.linearGradient(listOf(Color(0xFF4CAF50), CardNavy))
 
+=======
+// ID card gradients
+val CardGradientLight  = Brush.linearGradient(listOf(Color(0xFF2E7D32), CardNavy))
+val CardGradientDark   = Brush.linearGradient(listOf(Color(0xFF4CAF50), CardNavy))
+
+>>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
 // Fallback Material3 definitions
 val Purple80 = RuppLightGreen
 val PurpleGrey80 = RuppTextSecondary
@@ -109,4 +116,7 @@ val Pink80 = RuppPrimaryGreen
 val Purple40 = RuppPrimaryGreen
 val PurpleGrey40 = RuppCardBg
 val Pink40 = RuppDarkBg
+<<<<<<< HEAD
 >>>>>>> origin/HomeAndNavigation
+=======
+>>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list

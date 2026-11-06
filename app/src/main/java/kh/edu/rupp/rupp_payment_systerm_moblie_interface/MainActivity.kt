@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 <<<<<<< HEAD
+<<<<<<< HEAD
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
@@ -25,13 +26,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.navigation.MainAppNavigation
 >>>>>>> origin/HomeAndNavigation
+=======
+import androidx.compose.ui.Modifier
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.PaymentHistoryScreen
+>>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+<<<<<<< HEAD
 <<<<<<< HEAD
             RUPP_Payment_Systerm_Moblie_InterfaceTheme {
                 var currentScreen by remember { mutableStateOf("loading") }
@@ -111,7 +118,15 @@ class MainActivity : ComponentActivity() {
                     MainAppNavigation()
 >>>>>>> origin/HomeAndNavigation
                 }
+=======
+            RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+                PaymentHistoryScreen()
+>>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
             }
         }
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/HistoryAndReceipts/Feat/Payment_history_list
