@@ -91,3 +91,22 @@ val Pink80 = RuppPrimaryGreen
 val Purple40 = RuppPrimaryGreen
 val PurpleGrey40 = RuppCardBg
 val Pink40 = RuppDarkBg
+
+// -——— Payment UI Specific Palette (Tab Ayutaya) -———
+val RuppForestGreen        = Color(0xFF1E3F32)
+val RuppDarkGreen          = Color(0xFF152C23)
+val RuppEmerald            = Color(0xFF10B981)
+val RuppEmeraldLight       = Color(0xFF34D399)
+val RuppTopUpGreen         = Color(0xFF00875A)
+val DarkSurfaceElevated    = Color(0xFF202E27)
+val TextWhite              = Color(0xFFFFFFFF)
+val TextLightGray          = Color(0xFF9EA7A2)
+val TextDarkMuted          = Color(0xFF6B7280)
+val BadgeUnpaidBg          = Color(0xFF4D391A)
+val BadgeUnpaidText        = Color(0xFFFDE68A)
+val BadgeRetryBg           = Color(0xFF5C2320)
+val BadgeRetryText         = Color(0xFFFFB4AB)
+val BadgePaidBg            = Color(0xFF163A29)
+val BadgePaidText          = Color(0xFF6EE7B7)
+val ActionIconBgDark       = Color(0xFF202E27)
+val ActionIconBgLight      = Color(0xFFE6ECE8)

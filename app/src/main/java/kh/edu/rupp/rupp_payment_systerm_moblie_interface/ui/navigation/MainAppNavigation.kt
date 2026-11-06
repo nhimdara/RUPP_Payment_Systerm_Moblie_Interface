@@ -54,16 +54,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentMethodType
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.PaymentReceipt
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SampleDashboardData
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SampleStudentProfile
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.SchoolFeeItem
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.StudentProfile
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.TuitionDashboardSummary
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.data.model.TuitionPaymentStatus
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.PaymentModal
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.ReceiptModal
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppBottomNavBar
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.RuppNavTab
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.components.StudentProfileSummaryCard
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.HomeScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.NotificationsScreen
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.SchoolFeeListScreen
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.ActiveMint
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.GreenAccentDark
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.GreenPrimary
@@ -102,6 +111,9 @@ fun MainAppNavigation(
     var selectedTab by remember { mutableStateOf(initialTab) }
     var currentSubDestination by remember { mutableStateOf<SubDestination?>(null) }
     var notifications by remember { mutableStateOf(SampleDashboardData.initialNotifications) }
+    var selectedFee by remember { mutableStateOf<SchoolFeeItem?>(null) }
+    var showPaymentModal by remember { mutableStateOf(false) }
+    var activeReceipt by remember { mutableStateOf<PaymentReceipt?>(null) }
 
     val unreadCount = notifications.count { !it.isRead }
 
@@ -167,10 +179,14 @@ fun MainAppNavigation(
                 }
 
                 RuppNavTab.TUITION -> {
-                    TuitionTabContent(
-                        student = student,
-                        summary = summary,
-                        modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                    SchoolFeeListScreen(
+                        onNavigateBack = {
+                            selectedTab = RuppNavTab.HOME
+                        },
+                        onFeeClick = { fee ->
+                            selectedFee = fee
+                            showPaymentModal = true
+                        }
                     )
                 }
 
@@ -190,6 +206,45 @@ fun MainAppNavigation(
                 else -> {}
             }
         }
+    }
+
+    // Modal Checkout: Tab Ayutaya's Payment Method Selection & Balance Validation
+    if (showPaymentModal && selectedFee != null) {
+        PaymentModal(
+            feeItem = selectedFee!!,
+            studentBalance = 120.00,
+            onDismiss = {
+                showPaymentModal = false
+            },
+            onConfirmPayment = { fee, method ->
+                showPaymentModal = false
+                val timestamp = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date())
+                val randomReceiptId = (1000..9999).random()
+
+                activeReceipt = PaymentReceipt(
+                    receiptNumber = "RCP-2026-$randomReceiptId",
+                    studentName = student.fullName,
+                    studentId = student.studentId,
+                    facultyName = student.faculty,
+                    majorName = student.major,
+                    feeTitle = fee.title,
+                    totalAmount = fee.totalAmount,
+                    paymentMethod = method,
+                    transactionRef = "TXN-${System.currentTimeMillis().toString().takeLast(8)}",
+                    issueDate = timestamp
+                )
+            }
+        )
+    }
+
+    // Official Electronic Receipt Modal (pops up immediately upon successful confirmation)
+    activeReceipt?.let { receipt ->
+        ReceiptModal(
+            receipt = receipt,
+            onDismiss = {
+                activeReceipt = null
+            }
+        )
     }
 }
 
