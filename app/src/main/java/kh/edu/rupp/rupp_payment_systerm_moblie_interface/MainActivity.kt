@@ -19,12 +19,14 @@ import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.ForgotPasswo
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoadingScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.LoginScreen
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.RegisterScreen
-import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
+import androidx.compose.ui.Modifier
+import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.screens.PaymentHistoryScreenimport kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.theme.RUPP_Payment_Systerm_Moblie_InterfaceTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import kh.edu.rupp.rupp_payment_systerm_moblie_interface.ui.navigation.MainAppNavigation
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -105,6 +107,9 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     MainAppNavigation()
                 }
+                            RUPP_Payment_Systerm_Moblie_InterfaceTheme(darkTheme = true) {
+                PaymentHistoryScreen()
+
             }
         }
     }
