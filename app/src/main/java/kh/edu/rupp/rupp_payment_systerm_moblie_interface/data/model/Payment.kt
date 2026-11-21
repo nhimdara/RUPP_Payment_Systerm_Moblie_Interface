@@ -9,15 +9,22 @@ data class PaymentResponse(
     val studentEmail: String,
     val facultyName: String?,
     val academicYearLabel: String?,
-    val feeStructureId: Long,
-    val feeStructureAmount: Double,
+    val feeStructureId: Long?, // null for campus service payments
+    val feeStructureAmount: Double?,
     val status: PaymentStatus,
     val paymentDate: String,
     val totalPaid: Double,
     val remarks: String?,
     val details: List<PaymentDetailResponse> = emptyList(),
-    val receipt: ReceiptResponse? = null // filled once the payment is CONFIRMED
-)
+    val receipt: ReceiptResponse? = null, // filled once the payment is CONFIRMED
+    // Campus service payments (backend branch feat/campus-service-fees)
+    val paymentType: String? = "TUITION", // TUITION or SERVICE
+    val serviceFeeId: Long? = null,
+    val serviceFeeName: String? = null,
+    val serviceFeeCategory: String? = null
+) {
+    val isService: Boolean get() = paymentType == "SERVICE" || serviceFeeId != null
+}
 
 data class PaymentDetailResponse(
     val id: Long,
